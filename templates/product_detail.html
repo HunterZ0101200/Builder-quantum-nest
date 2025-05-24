@@ -1,0 +1,108 @@
+{% extends "base.html" %} {% block title %}{{ product.name }}{% endblock %} {%
+block content %}
+<div class="container">
+  <a href="javascript:history.back()" class="back-button">
+    <i class="fas fa-arrow-left"></i> Back
+  </a>
+
+  <div class="product-detail">
+    <!-- Product Image -->
+    <div class="product-detail-image">
+      <img src="{{ product.image }}" alt="{{ product.name }}" />
+    </div>
+
+    <!-- Product Details -->
+    <div class="product-detail-content">
+      <h1 class="product-detail-title">{{ product.name }}</h1>
+      <div class="product-detail-rating">
+        <i class="fas fa-star"></i>
+        <span>{{ product.rating }}</span>
+      </div>
+
+      <div class="product-detail-price">${{ product.price }}</div>
+
+      <div class="product-detail-description">
+        <h3 class="detail-section-title">Description</h3>
+        <p>{{ product.description }}</p>
+      </div>
+
+      {% if product.in_stock %}
+      <div class="product-detail-actions">
+        <div class="quantity-selector">
+          <span class="quantity-label">Quantity</span>
+          <div class="quantity-controls">
+            <button class="quantity-btn" id="decreaseQuantity">
+              <i class="fas fa-minus"></i>
+            </button>
+            <span class="quantity-value" id="quantityValue">1</span>
+            <button class="quantity-btn" id="increaseQuantity">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="btn btn-primary btn-full"
+          id="addToCartBtn"
+          data-product-id="{{ product.id }}"
+        >
+          <i class="fas fa-shopping-cart"></i> Add to Cart
+        </button>
+      </div>
+      {% else %}
+      <button class="btn btn-primary btn-full" disabled>Out of Stock</button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {% if related_products %}
+  <div class="related-products">
+    <h2 class="section-title">Related Products</h2>
+    <div class="products-grid">
+      {% for product in related_products %}
+      <div class="product-card">
+        <a href="/product/{{ product.id }}/">
+          <div class="product-image">
+            <img src="{{ product.image }}" alt="{{ product.name }}" />
+            {% if product.featured %}
+            <span class="product-badge">Featured</span>
+            {% endif %} {% if not product.in_stock %}
+            <div class="out-of-stock">
+              <span>Out of Stock</span>
+            </div>
+            {% endif %}
+          </div>
+          <div class="product-content">
+            <div class="product-rating">
+              <i class="fas fa-star"></i>
+              <span>{{ product.rating }}</span>
+            </div>
+            <h3 class="product-title">{{ product.name }}</h3>
+            <p class="product-price">${{ product.price }}</p>
+          </div>
+          <div class="product-footer">
+            <button
+              class="btn btn-primary btn-full add-to-cart"
+              data-product-id="{{ product.id }}"
+              {%
+              if
+              not
+              product.in_stock
+              %}disabled{%
+              endif
+              %}
+            >
+              <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %} {% block extra_js %}
+<script src="/static/js/product_detail.js"></script>
+{% endblock %}

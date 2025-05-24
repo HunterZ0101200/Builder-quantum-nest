@@ -1,0 +1,148 @@
+{% extends "base.html" %} {% block title %} {% if current_category %} {{
+current_category.name }} {% else %} All Products {% endif %} {% endblock %} {%
+block content %}
+<div class="container">
+  <div class="products-header">
+    <h1 class="page-title">
+      {% if current_category %} {{ current_category.name }} {% else %} All
+      Products {% endif %}
+    </h1>
+    <p class="products-count">
+      {{ products|length }} {% if products|length == 1 %}product{% else
+      %}products{% endif %} available
+    </p>
+  </div>
+
+  <div class="products-layout">
+    <!-- Mobile Filters Toggle -->
+    <button class="btn btn-outline filters-toggle" id="filtersToggle">
+      <i class="fas fa-sliders-h"></i> {% if filters_visible %}Hide Filters{%
+      else %}Show Filters{% endif %}
+    </button>
+
+    <!-- Filters Sidebar -->
+    <div class="filters-sidebar" id="filtersSidebar">
+      <div class="filters-content">
+        <div class="filters-header">
+          <h3 class="filters-title">Filters</h3>
+          <button class="btn btn-text btn-sm" id="clearFilters">
+            Clear all
+          </button>
+        </div>
+
+        <div class="filter-group">
+          <h4 class="filter-group-title">Search</h4>
+          <div class="search-filter">
+            <i class="fas fa-search search-icon"></i>
+            <input
+              type="search"
+              placeholder="Search products..."
+              class="search-input"
+              id="productSearch"
+            />
+            <button
+              class="btn btn-icon clear-search-btn"
+              id="clearSearch"
+              style="display: none"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h4 class="filter-group-title">Price Range</h4>
+          <div class="price-range">
+            <div class="price-range-labels">
+              <span class="price-min">$<span id="priceMin">0</span></span>
+              <span class="price-max">$<span id="priceMax">500</span></span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="500"
+              value="500"
+              class="price-slider"
+              id="priceSlider"
+            />
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h4 class="filter-group-title">Categories</h4>
+          <div class="categories-filter">
+            {% for category in categories %}
+            <div class="category-checkbox">
+              <input
+                type="checkbox"
+                id="category-{{ category.id }}"
+                value="{{ category.id }}"
+                {%
+                if
+                current_category
+                and
+                current_category.id=""
+                ="category.id"
+                %}checked{%
+                endif
+                %}
+              />
+              <label for="category-{{ category.id }}"
+                >{{ category.name }}</label
+              >
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="products-container">
+      <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+          <a href="/product/{{ product.id }}/">
+            <div class="product-image">
+              <img src="{{ product.image }}" alt="{{ product.name }}" />
+              {% if product.featured %}
+              <span class="product-badge">Featured</span>
+              {% endif %} {% if not product.in_stock %}
+              <div class="out-of-stock">
+                <span>Out of Stock</span>
+              </div>
+              {% endif %}
+            </div>
+            <div class="product-content">
+              <div class="product-rating">
+                <i class="fas fa-star"></i>
+                <span>{{ product.rating }}</span>
+              </div>
+              <h3 class="product-title">{{ product.name }}</h3>
+              <p class="product-price">${{ product.price }}</p>
+            </div>
+            <div class="product-footer">
+              <button
+                class="btn btn-primary btn-full add-to-cart"
+                data-product-id="{{ product.id }}"
+                {%
+                if
+                not
+                product.in_stock
+                %}disabled{%
+                endif
+                %}
+              >
+                <i class="fas fa-shopping-cart"></i> Add to Cart
+              </button>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="/static/js/products.js"></script>
+{% endblock %}

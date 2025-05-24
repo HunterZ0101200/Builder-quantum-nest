@@ -1,0 +1,138 @@
+{% extends "base.html" %} {% block title %}Search Results{% endblock %} {% block
+content %}
+<div class="container">
+  <div class="search-results-header">
+    <a href="/search/" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Search
+    </a>
+
+    <!-- Search Form -->
+    <form
+      action="/search-results/"
+      method="get"
+      class="search-form results-search-form"
+    >
+      <div class="search-input-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="search"
+          name="q"
+          placeholder="Search products..."
+          class="search-input"
+          value="{{ query }}"
+        />
+        <button type="submit" class="btn btn-primary search-btn-sm">
+          Search
+        </button>
+      </div>
+    </form>
+
+    <h1 class="search-results-title">
+      {% if query %} Search results for "{{ query }}" {% else %} Search Results
+      {% endif %}
+    </h1>
+    <p class="search-results-count">
+      {{ products|length }} {% if products|length == 1 %}product{% else
+      %}products{% endif %} found
+    </p>
+  </div>
+
+  {% if products %}
+  <div class="search-results-content">
+    <!-- Mobile Filters Toggle -->
+    <button class="btn btn-outline filters-toggle" id="filtersToggle">
+      <i class="fas fa-sliders-h"></i> {% if filters_visible %}Hide Filters{%
+      else %}Show Filters{% endif %}
+    </button>
+
+    <!-- Filters Sidebar -->
+    <div class="filters-sidebar" id="filtersSidebar">
+      <div class="filters-content">
+        <div class="filters-header">
+          <h3 class="filters-title">Filters</h3>
+          <button class="btn btn-text btn-sm" id="clearFilters">
+            Clear all
+          </button>
+        </div>
+
+        <div class="filter-group">
+          <h4 class="filter-group-title">Price Range</h4>
+          <div class="price-range">
+            <div class="price-range-labels">
+              <span class="price-min">$<span id="priceMin">0</span></span>
+              <span class="price-max">$<span id="priceMax">500</span></span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="500"
+              value="500"
+              class="price-slider"
+              id="priceSlider"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="products-container">
+      <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+          <a href="/product/{{ product.id }}/">
+            <div class="product-image">
+              <img src="{{ product.image }}" alt="{{ product.name }}" />
+              {% if product.featured %}
+              <span class="product-badge">Featured</span>
+              {% endif %} {% if not product.in_stock %}
+              <div class="out-of-stock">
+                <span>Out of Stock</span>
+              </div>
+              {% endif %}
+            </div>
+            <div class="product-content">
+              <div class="product-rating">
+                <i class="fas fa-star"></i>
+                <span>{{ product.rating }}</span>
+              </div>
+              <h3 class="product-title">{{ product.name }}</h3>
+              <p class="product-price">${{ product.price }}</p>
+            </div>
+            <div class="product-footer">
+              <button
+                class="btn btn-primary btn-full add-to-cart"
+                data-product-id="{{ product.id }}"
+                {%
+                if
+                not
+                product.in_stock
+                %}disabled{%
+                endif
+                %}
+              >
+                <i class="fas fa-shopping-cart"></i> Add to Cart
+              </button>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-results">
+    <div class="empty-results-icon">
+      <i class="fas fa-search"></i>
+    </div>
+    <h2 class="empty-results-title">No products found</h2>
+    <p class="empty-results-text">
+      Try using different keywords or browse our categories
+    </p>
+    <a href="/products/" class="btn btn-primary">Browse All Products</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %} {% block extra_js %}
+<script src="/static/js/search_results.js"></script>
+{% endblock %}

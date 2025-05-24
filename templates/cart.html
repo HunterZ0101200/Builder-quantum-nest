@@ -1,0 +1,116 @@
+{% extends "base.html" %} {% block title %}Your Cart{% endblock %} {% block
+content %}
+<div class="container">
+  <h1 class="page-title">Your Cart</h1>
+
+  {% if cart_items %}
+  <div class="cart-layout">
+    <div class="cart-items-container">
+      <div class="cart-header">
+        <span class="cart-count">
+          {{ cart_items|length }} {% if cart_items|length == 1 %}Item{% else
+          %}Items{% endif %}
+        </span>
+        <button class="btn btn-text" id="clearCartBtn">Clear Cart</button>
+      </div>
+
+      <div class="cart-items">
+        {% for item in cart_items %}
+        <div class="cart-item" data-product-id="{{ item.product.id }}">
+          <div class="cart-item-image">
+            <img src="{{ item.product.image }}" alt="{{ item.product.name }}" />
+          </div>
+
+          <div class="cart-item-content">
+            <div class="cart-item-header">
+              <a href="/product/{{ item.product.id }}/" class="cart-item-title">
+                {{ item.product.name }}
+              </a>
+              <span class="cart-item-price">${{ item.total_price }}</span>
+            </div>
+
+            <div class="cart-item-actions">
+              <div class="quantity-controls cart-quantity">
+                <button
+                  class="quantity-btn decrease-quantity"
+                  data-product-id="{{ item.product.id }}"
+                >
+                  <i class="fas fa-minus"></i>
+                </button>
+                <span class="quantity-value">{{ item.quantity }}</span>
+                <button
+                  class="quantity-btn increase-quantity"
+                  data-product-id="{{ item.product.id }}"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+
+              <button
+                class="btn btn-icon remove-item"
+                data-product-id="{{ item.product.id }}"
+              >
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="cart-footer">
+        <a href="/products/" class="btn btn-outline btn-with-icon">
+          <i class="fas fa-arrow-left"></i> Continue Shopping
+        </a>
+      </div>
+    </div>
+
+    <div class="cart-summary">
+      <h2 class="cart-summary-title">Order Summary</h2>
+
+      <div class="summary-items">
+        <div class="summary-item">
+          <span class="summary-item-label">Subtotal</span>
+          <span class="summary-item-value">${{ subtotal }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-item-label">Shipping</span>
+          <span class="summary-item-value">${{ shipping }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-item-label">Tax (10%)</span>
+          <span class="summary-item-value">${{ tax }}</span>
+        </div>
+
+        <div class="summary-total">
+          <span class="summary-total-label">Total</span>
+          <span class="summary-total-value">${{ total }}</span>
+        </div>
+      </div>
+
+      <div class="summary-actions">
+        <a href="/checkout/" class="btn btn-primary btn-full"
+          >Proceed to Checkout</a
+        >
+        <p class="summary-note">Taxes and shipping calculated at checkout</p>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-cart">
+    <div class="empty-cart-icon">
+      <i class="fas fa-shopping-bag"></i>
+    </div>
+    <h2 class="empty-cart-title">Your cart is empty</h2>
+    <p class="empty-cart-text">
+      Looks like you haven't added anything to your cart yet.
+    </p>
+    <a href="/products/" class="btn btn-primary">Continue Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %} {% block extra_js %}
+<script src="/static/js/cart.js"></script>
+{% endblock %}

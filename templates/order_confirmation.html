@@ -1,0 +1,165 @@
+{% extends "base.html" %} {% block title %}Order Confirmation{% endblock %} {%
+block content %}
+<div class="container">
+  <div class="order-confirmation">
+    <div class="confirmation-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h1 class="confirmation-title">Thank You for Your Order!</h1>
+    <p class="confirmation-message">
+      Your order has been placed successfully. We're working on it right away.
+    </p>
+
+    <div class="order-details">
+      <h2 class="order-details-title">Order Details</h2>
+      <div class="order-info">
+        <div class="order-info-item">
+          <span class="info-label">Order Number:</span>
+          <span class="info-value">#{{ order.id }}</span>
+        </div>
+        <div class="order-info-item">
+          <span class="info-label">Date:</span>
+          <span class="info-value">{{ order.created|date:"F j, Y" }}</span>
+        </div>
+        <div class="order-info-item">
+          <span class="info-label">Name:</span>
+          <span class="info-value">{{ order.full_name }}</span>
+        </div>
+        <div class="order-info-item">
+          <span class="info-label">Email:</span>
+          <span class="info-value">{{ order.email }}</span>
+        </div>
+        <div class="order-info-item">
+          <span class="info-label">Total:</span>
+          <span class="info-value"
+            >${{ order.get_total_cost|floatformat:2 }}</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="order-items">
+      <h3 class="order-items-title">Items Ordered</h3>
+      <div class="order-item-list">
+        {% for item in order.items.all %}
+        <div class="order-item">
+          <div class="order-item-info">
+            <span class="order-item-name">{{ item.product.name }}</span>
+            <span class="order-item-quantity">x {{ item.quantity }}</span>
+          </div>
+          <span class="order-item-price"
+            >${{ item.get_cost|floatformat:2 }}</span
+          >
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="confirmation-actions">
+      <a href="{% url 'home' %}" class="btn btn-primary">Continue Shopping</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Additional styles for the order confirmation page */
+  .order-confirmation {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .confirmation-icon {
+    font-size: 4rem;
+    color: var(--color-success);
+    margin-bottom: 1rem;
+  }
+
+  .confirmation-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .confirmation-message {
+    color: var(--color-text-light);
+    margin-bottom: 2rem;
+  }
+
+  .order-details {
+    text-align: left;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-secondary);
+  }
+
+  .order-details-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .order-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .order-info-item {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .info-label {
+    font-weight: 500;
+  }
+
+  .order-items {
+    text-align: left;
+    margin-bottom: 2rem;
+  }
+
+  .order-items-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .order-item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .order-item {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .order-item:last-child {
+    border-bottom: none;
+  }
+
+  .order-item-info {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .order-item-name {
+    font-weight: 500;
+  }
+
+  .order-item-quantity {
+    color: var(--color-text-light);
+  }
+
+  .confirmation-actions {
+    margin-top: 2rem;
+  }
+</style>
+{% endblock %}

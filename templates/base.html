@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopFusion - {% block title %}Home{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <header class="header">
+      <div class="container header-container">
+        <a href="/" class="logo">ShopFusion</a>
+
+        <!-- Desktop Navigation -->
+        <nav class="desktop-nav">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/products/" class="nav-link">All Products</a>
+          <a href="/products/electronics/" class="nav-link">Electronics</a>
+          <a href="/products/clothing/" class="nav-link">Clothing</a>
+          <a href="/products/accessories/" class="nav-link">Accessories</a>
+        </nav>
+
+        <div class="header-actions">
+          <!-- Search Button -->
+          <a href="/search/" class="icon-button">
+            <i class="fas fa-search"></i>
+          </a>
+
+          <!-- Cart Icon -->
+          <a href="/cart/" class="icon-button cart-icon">
+            <i class="fas fa-shopping-bag"></i>
+            <span class="cart-count" id="cartCount">0</span>
+          </a>
+
+          <!-- Profile Icon -->
+          <a href="#" class="icon-button profile-icon">
+            <i class="fas fa-user"></i>
+          </a>
+
+          <!-- Mobile Menu Toggle -->
+          <button class="menu-toggle icon-button" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation -->
+      <div class="mobile-nav" id="mobileNav">
+        <nav class="mobile-nav-menu">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/products/" class="nav-link">All Products</a>
+          <a href="/products/electronics/" class="nav-link">Electronics</a>
+          <a href="/products/clothing/" class="nav-link">Clothing</a>
+          <a href="/products/accessories/" class="nav-link">Accessories</a>
+          <a href="#" class="nav-link">
+            <i class="fas fa-user"></i> My Profile
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-column">
+            <h3 class="footer-heading">Shop</h3>
+            <ul class="footer-links">
+              <li><a href="/products/">All Products</a></li>
+              <li><a href="/products/electronics/">Electronics</a></li>
+              <li><a href="/products/clothing/">Clothing</a></li>
+              <li><a href="/products/accessories/">Accessories</a></li>
+              <li><a href="/products/home/">Home & Kitchen</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-column">
+            <h3 class="footer-heading">Customer Service</h3>
+            <ul class="footer-links">
+              <li><a href="#">Contact Us</a></li>
+              <li><a href="#">Shipping Policy</a></li>
+              <li><a href="#">Returns & Exchanges</a></li>
+              <li><a href="#">FAQs</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-column">
+            <h3 class="footer-heading">Company</h3>
+            <ul class="footer-links">
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Careers</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-column">
+            <h3 class="footer-heading">Stay Connected</h3>
+            <p class="footer-text">
+              Subscribe to our newsletter for updates on new products and
+              special promotions.
+            </p>
+            <div class="social-icons">
+              <a href="#" class="social-icon"
+                ><i class="fab fa-facebook-f"></i
+              ></a>
+              <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="social-icon"
+                ><i class="fab fa-instagram"></i
+              ></a>
+              <a href="#" class="social-icon"
+                ><i class="fas fa-envelope"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>
+            &copy; <span id="currentYear"></span> ShopFusion. All rights
+            reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+    {% block extra_js %}{% endblock %}
+    <script>
+      document.getElementById("currentYear").textContent =
+        new Date().getFullYear();
+    </script>
+  </body>
+</html>

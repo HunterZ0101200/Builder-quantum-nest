@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block title %}Search Products{% endblock %} {%
+block content %}
+<div class="container narrow-container">
+  <h1 class="page-title text-center">Search Products</h1>
+
+  <!-- Search Form -->
+  <form action="/search-results/" method="get" class="search-form">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search search-icon"></i>
+      <input
+        type="search"
+        name="q"
+        placeholder="What are you looking for?"
+        class="search-input"
+        value="{{ query }}"
+        autofocus
+      />
+      <button type="submit" class="btn btn-primary search-btn">Search</button>
+    </div>
+  </form>
+
+  <!-- Popular Categories -->
+  <div class="search-section">
+    <h2 class="section-title">Popular Categories</h2>
+    <div class="categories-grid search-categories">
+      {% for category in categories %}
+      <a href="/products/{{ category.id }}/" class="category-button">
+        <div class="category-button-image">
+          <img src="{{ category.image }}" alt="{{ category.name }}" />
+        </div>
+        <span>{{ category.name }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Popular Searches -->
+  <div class="search-section">
+    <h2 class="section-title">Popular Searches</h2>
+    <div class="popular-searches">
+      {% for term in popular_searches %}
+      <a href="/search-results/?q={{ term|urlencode }}" class="search-tag"
+        >{{ term }}</a
+      >
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
