@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, Menu, X, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
@@ -9,9 +9,25 @@ export const Header = () => {
   const { totalItems } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search-results?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
+
+  const goToSearchPage = () => {
+    navigate("/search");
+    setIsSearchOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm">
@@ -53,7 +69,7 @@ export const Header = () => {
 
         <div className="flex items-center space-x-4">
           {/* Search Button */}
-          <Button variant="ghost" size="icon" onClick={toggleSearch}>
+          <Button variant="ghost" size="icon" onClick={goToSearchPage}>
             <Search className="w-5 h-5" />
           </Button>
 
@@ -92,23 +108,36 @@ export const Header = () => {
       {isSearchOpen && (
         <div className="border-b">
           <div className="container px-4 py-3 mx-auto max-w-7xl">
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Search for products..."
-                className="w-full pl-10 pr-10"
+                className="w-full pl-10 pr-24"
                 autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-10 w-10"
-                onClick={toggleSearch}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+              <div className="absolute right-0 top-0 h-10 flex">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="mr-1 h-10"
+                  disabled={!searchQuery.trim()}
+                >
+                  Search
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10"
+                  onClick={toggleSearch}
+                  type="button"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}
