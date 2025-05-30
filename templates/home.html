@@ -1,15 +1,44 @@
-{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
-%}
+{% extends "base.html" %} {% block title %}Home - Auto Parts Store{% endblock %}
+{% block content %}
 <div class="container">
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h1 class="hero-title">Summer Collection 2023</h1>
+      <h1 class="hero-title">Quality Auto Parts & Truck Accessories</h1>
       <p class="hero-text">
-        Discover our latest products with premium quality and affordable prices.
-        Shop now and get free shipping on all orders.
+        Professional-grade automobile spare parts for trucks, cars, and
+        commercial vehicles. Trusted by mechanics and auto retailers nationwide.
       </p>
-      <a href="/products/" class="btn btn-light btn-lg">Shop Now</a>
+      <a href="{% url 'products' %}" class="btn btn-light btn-lg"
+        >Browse Parts</a
+      >
+    </div>
+  </section>
+
+  <!-- Top Brands Section -->
+  <section class="brands-section">
+    <div class="section-header">
+      <h2 class="section-title">Top Brands</h2>
+      <a href="{% url 'products' %}" class="view-all">
+        View all brands
+        <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="brands-grid">
+      {% for brand in brands %}
+      <a
+        href="{% url 'products_by_brand' brand.slug %}"
+        class="brand-card"
+        title="{{ brand.name }}"
+      >
+        {% if brand.logo %}
+        <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" />
+        {% else %}
+        <div class="brand-name">{{ brand.name }}</div>
+        {% endif %}
+      </a>
+      {% endfor %}
     </div>
   </section>
 
@@ -17,7 +46,7 @@
   <section class="categories-section">
     <div class="section-header">
       <h2 class="section-title">Shop by Category</h2>
-      <a href="/products/" class="view-all">
+      <a href="{% url 'products' %}" class="view-all">
         View all categories
         <i class="fas fa-arrow-right"></i>
       </a>
@@ -25,9 +54,12 @@
 
     <div class="categories-grid">
       {% for category in categories %}
-      <a href="/products/{{ category.id }}/" class="category-card">
+      <a
+        href="{% url 'products_by_category' category.slug %}"
+        class="category-card"
+      >
         <div class="category-image">
-          <img src="{{ category.image }}" alt="{{ category.name }}" />
+          <img src="{{ category.image.url }}" alt="{{ category.name }}" />
           <div class="category-overlay">
             <h3 class="category-name">{{ category.name }}</h3>
           </div>
@@ -40,8 +72,8 @@
   <!-- Featured Products Section -->
   <section class="products-section">
     <div class="section-header">
-      <h2 class="section-title">Featured Products</h2>
-      <a href="/products/" class="view-all">
+      <h2 class="section-title">Featured Parts</h2>
+      <a href="{% url 'products' %}" class="view-all">
         View all products
         <i class="fas fa-arrow-right"></i>
       </a>
@@ -50,9 +82,9 @@
     <div class="products-grid">
       {% for product in featured_products %}
       <div class="product-card">
-        <a href="/product/{{ product.id }}/">
+        <a href="{{ product.get_absolute_url }}">
           <div class="product-image">
-            <img src="{{ product.image }}" alt="{{ product.name }}" />
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" />
             {% if product.featured %}
             <span class="product-badge">Featured</span>
             {% endif %} {% if not product.in_stock %}
@@ -62,27 +94,16 @@
             {% endif %}
           </div>
           <div class="product-content">
+            <div class="product-brand">{{ product.brand.name }}</div>
             <div class="product-rating">
               <i class="fas fa-star"></i>
               <span>{{ product.rating }}</span>
             </div>
             <h3 class="product-title">{{ product.name }}</h3>
-            <p class="product-price">${{ product.price }}</p>
-          </div>
-          <div class="product-footer">
-            <button
-              class="btn btn-primary btn-full add-to-cart"
-              data-product-id="{{ product.id }}"
-              {%
-              if
-              not
-              product.in_stock
-              %}disabled{%
-              endif
-              %}
-            >
-              <i class="fas fa-shopping-cart"></i> Add to Cart
-            </button>
+            {% if product.part_number %}
+            <div class="part-number">Part #: {{ product.part_number }}</div>
+            {% endif %}
+            <p class="product-price">{{ product.price_range }}</p>
           </div>
         </a>
       </div>
@@ -93,14 +114,68 @@
   <!-- Promotion Banner -->
   <section class="promo-banner">
     <div class="promo-content">
-      <h2 class="promo-title">Get 15% Off Your First Order</h2>
+      <h2 class="promo-title">Professional Discounts Available</h2>
       <p class="promo-text">
-        Sign up for our newsletter and receive a discount code.
+        Register your auto shop for wholesale pricing and bulk discounts.
       </p>
     </div>
-    <a href="#" class="btn btn-primary btn-lg">Subscribe Now</a>
+    <a href="#" class="btn btn-primary btn-lg">Contact Sales</a>
   </section>
 </div>
+
+<style>
+  /* Additional styles for auto parts theme */
+  .brands-section {
+    margin-bottom: 4rem;
+  }
+
+  .brands-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .brand-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: white;
+    transition: all 0.3s ease;
+    min-height: 80px;
+  }
+
+  .brand-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .brand-card img {
+    max-width: 100%;
+    max-height: 60px;
+    object-fit: contain;
+  }
+
+  .brand-name {
+    font-weight: 600;
+    color: var(--color-text);
+    text-align: center;
+  }
+
+  .product-brand {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    margin-bottom: 0.25rem;
+  }
+
+  .part-number {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    margin-top: 0.25rem;
+  }
+</style>
 {% endblock %} {% block extra_js %}
 <script src="/static/js/home.js"></script>
 {% endblock %}

@@ -32,7 +32,7 @@ block content %}
         <div class="order-info-item">
           <span class="info-label">Total:</span>
           <span class="info-value"
-            >${{ order.get_total_cost|floatformat:2 }}</span
+            >₹{{ order.get_total_cost|floatformat:0 }}</span
           >
         </div>
       </div>
@@ -48,7 +48,7 @@ block content %}
             <span class="order-item-quantity">x {{ item.quantity }}</span>
           </div>
           <span class="order-item-price"
-            >${{ item.get_cost|floatformat:2 }}</span
+            >₹{{ item.get_cost|floatformat:0 }}</span
           >
         </div>
         {% endfor %}

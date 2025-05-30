@@ -1,5 +1,5 @@
-{% extends "base.html" %} {% block title %}{{ product.name }}{% endblock %} {%
-block content %}
+{% extends "base.html" %} {% block title %}{{ product.name }} - {{
+product.brand.name }}{% endblock %} {% block content %}
 <div class="container">
   <a href="javascript:history.back()" class="back-button">
     <i class="fas fa-arrow-left"></i> Back
@@ -8,25 +8,92 @@ block content %}
   <div class="product-detail">
     <!-- Product Image -->
     <div class="product-detail-image">
-      <img src="{{ product.image }}" alt="{{ product.name }}" />
+      <img src="{{ product.image.url }}" alt="{{ product.name }}" />
     </div>
 
     <!-- Product Details -->
     <div class="product-detail-content">
+      <div class="product-brand-name">{{ product.brand.name }}</div>
       <h1 class="product-detail-title">{{ product.name }}</h1>
+      {% if product.part_number %}
+      <div class="part-number-detail">Part #: {{ product.part_number }}</div>
+      {% endif %}
+
       <div class="product-detail-rating">
         <i class="fas fa-star"></i>
         <span>{{ product.rating }}</span>
       </div>
 
-      <div class="product-detail-price">${{ product.price }}</div>
+      <!-- Variant Selection -->
+      <div class="variant-selection">
+        <h3 class="variant-title">Select Quantity Package:</h3>
+        <div class="variants-container">
+          {% for variant in variants %}
+          <div
+            class="variant-option {% if variant.is_default %}selected{% endif %}"
+            data-variant-id="{{ variant.id }}"
+            data-price="{{ variant.price }}"
+            data-stock="{{ variant.stock }}"
+            data-in-stock="{{ variant.in_stock|yesno:'true,false' }}"
+          >
+            <div class="variant-name">{{ variant.variant_name }}</div>
+            <div class="variant-description">
+              {{ variant.quantity_description }}
+            </div>
+            <div class="variant-price">₹{{ variant.price|floatformat:0 }}</div>
+            {% if not variant.in_stock %}
+            <div class="variant-out-of-stock">Out of Stock</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Selected Price Display -->
+      <div class="selected-price" id="selectedPrice">
+        {% if default_variant %} ₹{{ default_variant.price|floatformat:0 }} {%
+        else %} Select a variant {% endif %}
+      </div>
+
+      <!-- Product Specifications -->
+      <div class="product-specs">
+        <h3 class="detail-section-title">Specifications</h3>
+        <div class="specs-grid">
+          <div class="spec-item">
+            <span class="spec-label">Brand:</span>
+            <span class="spec-value">{{ product.brand.name }}</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Category:</span>
+            <span class="spec-value">{{ product.category.name }}</span>
+          </div>
+          {% if product.weight %}
+          <div class="spec-item">
+            <span class="spec-label">Weight:</span>
+            <span class="spec-value">{{ product.weight }} kg</span>
+          </div>
+          {% endif %} {% if product.dimensions %}
+          <div class="spec-item">
+            <span class="spec-label">Dimensions:</span>
+            <span class="spec-value">{{ product.dimensions }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
 
       <div class="product-detail-description">
         <h3 class="detail-section-title">Description</h3>
         <p>{{ product.description }}</p>
       </div>
 
-      {% if product.in_stock %}
+      {% if product.compatibility %}
+      <div class="product-compatibility">
+        <h3 class="detail-section-title">Compatibility</h3>
+        <p>{{ product.compatibility }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Add to Cart Section -->
       <div class="product-detail-actions">
         <div class="quantity-selector">
           <span class="quantity-label">Quantity</span>
@@ -41,30 +108,56 @@ block content %}
           </div>
         </div>
 
-        <button
-          class="btn btn-primary btn-full"
-          id="addToCartBtn"
-          data-product-id="{{ product.id }}"
-        >
-          <i class="fas fa-shopping-cart"></i> Add to Cart
-        </button>
+        <form id="addToCartForm" method="post" action="{% url 'add_to_cart' %}">
+          {% csrf_token %}
+          <input
+            type="hidden"
+            name="variant_id"
+            id="selectedVariantId"
+            value="{% if default_variant %}{{ default_variant.id }}{% endif %}"
+          />
+          <input
+            type="hidden"
+            name="quantity"
+            id="selectedQuantity"
+            value="1"
+          />
+          <button
+            type="submit"
+            class="btn btn-primary btn-full"
+            id="addToCartBtn"
+            {%
+            if
+            not
+            default_variant
+            or
+            not
+            default_variant.in_stock
+            %}disabled{%
+            endif
+            %}
+          >
+            <i class="fas fa-shopping-cart"></i>
+            <span id="addToCartText">
+              {% if default_variant and default_variant.in_stock %} Add to Cart
+              {% else %} Select Variant {% endif %}
+            </span>
+          </button>
+        </form>
       </div>
-      {% else %}
-      <button class="btn btn-primary btn-full" disabled>Out of Stock</button>
-      {% endif %}
     </div>
   </div>
 
   <!-- Related Products -->
   {% if related_products %}
   <div class="related-products">
-    <h2 class="section-title">Related Products</h2>
+    <h2 class="section-title">Related Parts</h2>
     <div class="products-grid">
       {% for product in related_products %}
       <div class="product-card">
-        <a href="/product/{{ product.id }}/">
+        <a href="{{ product.get_absolute_url }}">
           <div class="product-image">
-            <img src="{{ product.image }}" alt="{{ product.name }}" />
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" />
             {% if product.featured %}
             <span class="product-badge">Featured</span>
             {% endif %} {% if not product.in_stock %}
@@ -74,27 +167,16 @@ block content %}
             {% endif %}
           </div>
           <div class="product-content">
+            <div class="product-brand">{{ product.brand.name }}</div>
             <div class="product-rating">
               <i class="fas fa-star"></i>
               <span>{{ product.rating }}</span>
             </div>
             <h3 class="product-title">{{ product.name }}</h3>
-            <p class="product-price">${{ product.price }}</p>
-          </div>
-          <div class="product-footer">
-            <button
-              class="btn btn-primary btn-full add-to-cart"
-              data-product-id="{{ product.id }}"
-              {%
-              if
-              not
-              product.in_stock
-              %}disabled{%
-              endif
-              %}
-            >
-              <i class="fas fa-shopping-cart"></i> Add to Cart
-            </button>
+            {% if product.part_number %}
+            <div class="part-number">Part #: {{ product.part_number }}</div>
+            {% endif %}
+            <p class="product-price">{{ product.price_range }}</p>
           </div>
         </a>
       </div>
@@ -103,6 +185,206 @@ block content %}
   </div>
   {% endif %}
 </div>
+
+<style>
+  /* Additional styles for product variants */
+  .product-brand-name {
+    font-size: 1rem;
+    color: var(--color-text-light);
+    margin-bottom: 0.5rem;
+  }
+
+  .part-number-detail {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    margin-bottom: 1rem;
+    font-family: monospace;
+  }
+
+  .variant-selection {
+    margin: 2rem 0;
+  }
+
+  .variant-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .variants-container {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .variant-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .variant-option:hover {
+    border-color: var(--color-primary);
+  }
+
+  .variant-option.selected {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-light);
+  }
+
+  .variant-option.out-of-stock {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .variant-name {
+    font-weight: 600;
+  }
+
+  .variant-description {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+  }
+
+  .variant-price {
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .variant-out-of-stock {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--color-error);
+    font-weight: 600;
+  }
+
+  .selected-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 1rem 0;
+  }
+
+  .product-specs {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: var(--color-secondary);
+    border-radius: var(--border-radius);
+  }
+
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .specs-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .spec-item {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .spec-label {
+    font-weight: 500;
+  }
+
+  .spec-value {
+    color: var(--color-text-light);
+  }
+
+  .product-compatibility {
+    margin: 1.5rem 0;
+  }
+</style>
 {% endblock %} {% block extra_js %}
-<script src="/static/js/product_detail.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Variant selection functionality
+    const variantOptions = document.querySelectorAll(".variant-option");
+    const selectedPrice = document.getElementById("selectedPrice");
+    const selectedVariantId = document.getElementById("selectedVariantId");
+    const addToCartBtn = document.getElementById("addToCartBtn");
+    const addToCartText = document.getElementById("addToCartText");
+
+    // Quantity controls
+    const decreaseBtn = document.getElementById("decreaseQuantity");
+    const increaseBtn = document.getElementById("increaseQuantity");
+    const quantityValue = document.getElementById("quantityValue");
+    const selectedQuantity = document.getElementById("selectedQuantity");
+
+    let quantity = 1;
+
+    // Handle variant selection
+    variantOptions.forEach((option) => {
+      option.addEventListener("click", function () {
+        if (this.classList.contains("out-of-stock")) return;
+
+        // Remove selected class from all options
+        variantOptions.forEach((opt) => opt.classList.remove("selected"));
+
+        // Add selected class to clicked option
+        this.classList.add("selected");
+
+        // Update price and variant ID
+        const price = parseFloat(this.dataset.price);
+        const variantId = this.dataset.variantId;
+        const inStock = this.dataset.inStock === "true";
+
+        selectedPrice.textContent = `₹${price.toLocaleString("en-IN", {
+          maximumFractionDigits: 0,
+        })}`;
+        selectedVariantId.value = variantId;
+
+        // Update add to cart button
+        if (inStock) {
+          addToCartBtn.disabled = false;
+          addToCartText.textContent = "Add to Cart";
+        } else {
+          addToCartBtn.disabled = true;
+          addToCartText.textContent = "Out of Stock";
+        }
+      });
+    });
+
+    // Quantity controls
+    if (decreaseBtn && increaseBtn) {
+      decreaseBtn.addEventListener("click", function () {
+        if (quantity > 1) {
+          quantity--;
+          quantityValue.textContent = quantity;
+          selectedQuantity.value = quantity;
+        }
+      });
+
+      increaseBtn.addEventListener("click", function () {
+        quantity++;
+        quantityValue.textContent = quantity;
+        selectedQuantity.value = quantity;
+      });
+    }
+
+    // Form submission
+    const addToCartForm = document.getElementById("addToCartForm");
+    if (addToCartForm) {
+      addToCartForm.addEventListener("submit", function (e) {
+        if (!selectedVariantId.value) {
+          e.preventDefault();
+          alert("Please select a variant before adding to cart.");
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

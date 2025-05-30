@@ -5,143 +5,78 @@ content %}
 
   <div class="checkout-layout">
     <div class="checkout-form-container">
-      <form id="checkoutForm" class="checkout-form">
+      <form
+        id="checkoutForm"
+        method="post"
+        action="{% url 'place_order' %}"
+        class="checkout-form"
+      >
+        {% csrf_token %}
+
+        <!-- Customer Information -->
+        <div class="form-section">
+          <h2 class="form-section-title">Customer Information</h2>
+          <div class="form-row">
+            <div class="form-group">
+              {{ form.first_name.label_tag }} {{ form.first_name }}
+            </div>
+
+            <div class="form-group">
+              {{ form.last_name.label_tag }} {{ form.last_name }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            {{ form.email.label_tag }} {{ form.email }}
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              {{ form.phone.label_tag }} {{ form.phone }}
+            </div>
+
+            <div class="form-group">
+              {{ form.company.label_tag }} {{ form.company }}
+            </div>
+          </div>
+        </div>
+
         <!-- Shipping Information -->
         <div class="form-section">
-          <h2 class="form-section-title">Shipping Information</h2>
-          <div class="form-row">
+          <h2 class="form-section-title">Shipping Address</h2>
+
+          <div class="form-group">
+            {{ form.address.label_tag }} {{ form.address }}
+          </div>
+
+          <div class="form-row form-row-3">
             <div class="form-group">
-              <label for="firstName" class="form-label">First Name</label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                class="form-input"
-                required
-              />
+              {{ form.city.label_tag }} {{ form.city }}
             </div>
 
             <div class="form-group">
-              <label for="lastName" class="form-label">Last Name</label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                class="form-input"
-                required
-              />
+              {{ form.state.label_tag }} {{ form.state }}
+            </div>
+
+            <div class="form-group">
+              {{ form.zip_code.label_tag }} {{ form.zip_code }}
             </div>
           </div>
 
           <div class="form-group">
-            <label for="email" class="form-label">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              class="form-input"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="address" class="form-label">Street Address</label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              class="form-input"
-              required
-            />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="city" class="form-label">City</label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                class="form-input"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="state" class="form-label">State</label>
-              <input
-                type="text"
-                id="state"
-                name="state"
-                class="form-input"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="zipCode" class="form-label">ZIP Code</label>
-              <input
-                type="text"
-                id="zipCode"
-                name="zipCode"
-                class="form-input"
-                required
-              />
-            </div>
+            {{ form.notes.label_tag }} {{ form.notes }}
           </div>
         </div>
 
         <!-- Payment Information -->
         <div class="form-section">
           <h2 class="form-section-title">Payment Information</h2>
-
-          <div class="form-group">
-            <label for="cardNumber" class="form-label">Card Number</label>
-            <input
-              type="text"
-              id="cardNumber"
-              name="cardNumber"
-              class="form-input"
-              placeholder="XXXX XXXX XXXX XXXX"
-              required
-            />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="cardName" class="form-label">Name on Card</label>
-              <input
-                type="text"
-                id="cardName"
-                name="cardName"
-                class="form-input"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="expiryDate" class="form-label">Expiry Date</label>
-              <input
-                type="text"
-                id="expiryDate"
-                name="expiryDate"
-                class="form-input"
-                placeholder="MM/YY"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="cvv" class="form-label">CVV</label>
-              <input
-                type="text"
-                id="cvv"
-                name="cvv"
-                class="form-input"
-                placeholder="123"
-                required
-              />
-            </div>
+          <div class="payment-notice">
+            <i class="fas fa-info-circle"></i>
+            <p>
+              For security, payment will be processed separately. You will
+              receive payment instructions via email.
+            </p>
           </div>
         </div>
 
@@ -152,27 +87,30 @@ content %}
             {% for item in cart_items %}
             <div class="mobile-summary-item">
               <span class="mobile-item-name">
-                {{ item.quantity }} x {{ item.product.name }}
+                {{ item.quantity }} x {{ item.product.brand.name }} {{
+                item.product.name }} - {{ item.variant.variant_name }}
               </span>
-              <span class="mobile-item-price">${{ item.total_price }}</span>
+              <span class="mobile-item-price"
+                >₹{{ item.total_price|floatformat:0 }}</span
+              >
             </div>
             {% endfor %}
 
             <div class="mobile-summary-subtotal">
               <span>Subtotal</span>
-              <span>${{ subtotal }}</span>
+              <span>₹{{ subtotal|floatformat:0 }}</span>
             </div>
             <div class="mobile-summary-subtotal">
               <span>Shipping</span>
-              <span>${{ shipping }}</span>
+              <span>₹{{ shipping|floatformat:0 }}</span>
             </div>
             <div class="mobile-summary-subtotal">
-              <span>Tax</span>
-              <span>${{ tax }}</span>
+              <span>Tax (18% GST)</span>
+              <span>₹{{ tax|floatformat:0 }}</span>
             </div>
             <div class="mobile-summary-total">
               <span>Total</span>
-              <span>${{ total }}</span>
+              <span>₹{{ total|floatformat:0 }}</span>
             </div>
           </div>
         </div>
@@ -182,7 +120,7 @@ content %}
           class="btn btn-primary btn-full checkout-btn"
           id="placeOrderBtn"
         >
-          Pay ${{ total }}
+          Place Order - ₹{{ total|floatformat:0 }}
         </button>
       </form>
     </div>
@@ -193,33 +131,87 @@ content %}
       <div class="order-summary-items">
         {% for item in cart_items %}
         <div class="order-summary-item">
-          <span class="order-item-name">
-            {{ item.quantity }} x {{ item.product.name }}
-          </span>
-          <span class="order-item-price">${{ item.total_price }}</span>
+          <div class="order-item-details">
+            <span class="order-item-name">
+              {{ item.product.brand.name }} {{ item.product.name }}
+            </span>
+            <span class="order-item-variant"
+              >{{ item.variant.variant_name }}</span
+            >
+            <span class="order-item-quantity">Qty: {{ item.quantity }}</span>
+          </div>
+          <span class="order-item-price"
+            >₹{{ item.total_price|floatformat:0 }}</span
+          >
         </div>
         {% endfor %}
 
         <div class="order-summary-subtotal">
           <span>Subtotal</span>
-          <span>${{ subtotal }}</span>
+          <span>₹{{ subtotal|floatformat:0 }}</span>
         </div>
         <div class="order-summary-subtotal">
           <span>Shipping</span>
-          <span>${{ shipping }}</span>
+          <span>₹{{ shipping|floatformat:0 }}</span>
         </div>
         <div class="order-summary-subtotal">
-          <span>Tax</span>
-          <span>${{ tax }}</span>
+          <span>Tax (18% GST)</span>
+          <span>₹{{ tax|floatformat:0 }}</span>
         </div>
         <div class="order-summary-total">
           <span>Total</span>
-          <span>${{ total }}</span>
+          <span>₹{{ total|floatformat:0 }}</span>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  /* Additional styles for auto parts checkout */
+  .payment-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: var(--color-primary-light);
+    border-radius: var(--border-radius);
+    color: var(--color-primary);
+  }
+
+  .order-item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .order-item-variant {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+  }
+
+  .order-item-quantity {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+  }
+</style>
 {% endblock %} {% block extra_js %}
-<script src="/static/js/checkout.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Checkout form submission
+    const checkoutForm = document.getElementById("checkoutForm");
+    const placeOrderBtn = document.getElementById("placeOrderBtn");
+
+    if (checkoutForm) {
+      checkoutForm.addEventListener("submit", function (e) {
+        if (placeOrderBtn) {
+          // Show processing state
+          const originalText = placeOrderBtn.textContent;
+          placeOrderBtn.textContent = "Processing Order...";
+          placeOrderBtn.disabled = true;
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

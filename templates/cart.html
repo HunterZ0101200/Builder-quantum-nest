@@ -11,47 +11,112 @@ content %}
           {{ cart_items|length }} {% if cart_items|length == 1 %}Item{% else
           %}Items{% endif %}
         </span>
-        <button class="btn btn-text" id="clearCartBtn">Clear Cart</button>
+        <form
+          method="post"
+          action="{% url 'clear_cart' %}"
+          class="clear-cart-form"
+        >
+          {% csrf_token %}
+          <button type="submit" class="btn btn-text" id="clearCartBtn">
+            Clear Cart
+          </button>
+        </form>
       </div>
 
       <div class="cart-items">
         {% for item in cart_items %}
-        <div class="cart-item" data-product-id="{{ item.product.id }}">
+        <div class="cart-item" data-variant-id="{{ item.variant.id }}">
           <div class="cart-item-image">
-            <img src="{{ item.product.image }}" alt="{{ item.product.name }}" />
+            <img
+              src="{{ item.product.image.url }}"
+              alt="{{ item.product.name }}"
+            />
           </div>
 
           <div class="cart-item-content">
             <div class="cart-item-header">
-              <a href="/product/{{ item.product.id }}/" class="cart-item-title">
-                {{ item.product.name }}
+              <a
+                href="{{ item.product.get_absolute_url }}"
+                class="cart-item-title"
+              >
+                {{ item.product.brand.name }} {{ item.product.name }}
               </a>
-              <span class="cart-item-price">${{ item.total_price }}</span>
+              <span class="cart-item-price"
+                >₹{{ item.total_price|floatformat:0 }}</span
+              >
+            </div>
+
+            <div class="cart-item-details">
+              <div class="variant-info">
+                <span class="variant-name"
+                  >{{ item.variant.variant_name }}</span
+                >
+                <span class="variant-description"
+                  >{{ item.variant.quantity_description }}</span
+                >
+              </div>
+              <div class="unit-price">
+                ₹{{ item.variant.price|floatformat:0 }} each
+              </div>
             </div>
 
             <div class="cart-item-actions">
               <div class="quantity-controls cart-quantity">
-                <button
-                  class="quantity-btn decrease-quantity"
-                  data-product-id="{{ item.product.id }}"
+                <form
+                  method="post"
+                  action="{% url 'update_cart_item' %}"
+                  class="quantity-form"
                 >
-                  <i class="fas fa-minus"></i>
-                </button>
-                <span class="quantity-value">{{ item.quantity }}</span>
-                <button
-                  class="quantity-btn increase-quantity"
-                  data-product-id="{{ item.product.id }}"
-                >
-                  <i class="fas fa-plus"></i>
-                </button>
+                  {% csrf_token %}
+                  <input
+                    type="hidden"
+                    name="variant_id"
+                    value="{{ item.variant.id }}"
+                  />
+                  <button
+                    type="button"
+                    class="quantity-btn decrease-quantity"
+                    data-variant-id="{{ item.variant.id }}"
+                  >
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <input
+                    type="number"
+                    name="quantity"
+                    class="quantity-value"
+                    value="{{ item.quantity }}"
+                    min="1"
+                    data-variant-id="{{ item.variant.id }}"
+                  />
+                  <button
+                    type="button"
+                    class="quantity-btn increase-quantity"
+                    data-variant-id="{{ item.variant.id }}"
+                  >
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </form>
               </div>
 
-              <button
-                class="btn btn-icon remove-item"
-                data-product-id="{{ item.product.id }}"
+              <form
+                method="post"
+                action="{% url 'remove_from_cart' %}"
+                class="remove-form"
               >
-                <i class="fas fa-trash-alt"></i>
-              </button>
+                {% csrf_token %}
+                <input
+                  type="hidden"
+                  name="variant_id"
+                  value="{{ item.variant.id }}"
+                />
+                <button
+                  type="submit"
+                  class="btn btn-icon remove-item"
+                  title="Remove item"
+                >
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -59,7 +124,7 @@ content %}
       </div>
 
       <div class="cart-footer">
-        <a href="/products/" class="btn btn-outline btn-with-icon">
+        <a href="{% url 'products' %}" class="btn btn-outline btn-with-icon">
           <i class="fas fa-arrow-left"></i> Continue Shopping
         </a>
       </div>
@@ -71,30 +136,30 @@ content %}
       <div class="summary-items">
         <div class="summary-item">
           <span class="summary-item-label">Subtotal</span>
-          <span class="summary-item-value">${{ subtotal }}</span>
+          <span class="summary-item-value">₹{{ subtotal|floatformat:0 }}</span>
         </div>
 
         <div class="summary-item">
           <span class="summary-item-label">Shipping</span>
-          <span class="summary-item-value">${{ shipping }}</span>
+          <span class="summary-item-value">₹{{ shipping|floatformat:0 }}</span>
         </div>
 
         <div class="summary-item">
-          <span class="summary-item-label">Tax (10%)</span>
-          <span class="summary-item-value">${{ tax }}</span>
+          <span class="summary-item-label">Tax (18% GST)</span>
+          <span class="summary-item-value">₹{{ tax|floatformat:0 }}</span>
         </div>
 
         <div class="summary-total">
           <span class="summary-total-label">Total</span>
-          <span class="summary-total-value">${{ total }}</span>
+          <span class="summary-total-value">₹{{ total|floatformat:0 }}</span>
         </div>
       </div>
 
       <div class="summary-actions">
-        <a href="/checkout/" class="btn btn-primary btn-full"
+        <a href="{% url 'checkout' %}" class="btn btn-primary btn-full"
           >Proceed to Checkout</a
         >
-        <p class="summary-note">Taxes and shipping calculated at checkout</p>
+        <p class="summary-note">Professional discounts available at checkout</p>
       </div>
     </div>
   </div>
@@ -105,12 +170,118 @@ content %}
     </div>
     <h2 class="empty-cart-title">Your cart is empty</h2>
     <p class="empty-cart-text">
-      Looks like you haven't added anything to your cart yet.
+      Browse our catalog of quality auto parts and truck accessories.
     </p>
-    <a href="/products/" class="btn btn-primary">Continue Shopping</a>
+    <a href="{% url 'products' %}" class="btn btn-primary">Browse Parts</a>
   </div>
   {% endif %}
 </div>
+
+<style>
+  /* Additional styles for variant display in cart */
+  .cart-item-details {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+  }
+
+  .variant-info {
+    color: var(--color-text-light);
+  }
+
+  .variant-name {
+    font-weight: 500;
+    margin-right: 0.5rem;
+  }
+
+  .unit-price {
+    color: var(--color-text-light);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .quantity-value {
+    width: 60px;
+    text-align: center;
+    border: 1px solid var(--color-border);
+    padding: 0.25rem;
+    margin: 0 0.25rem;
+  }
+
+  .quantity-form {
+    display: flex;
+    align-items: center;
+  }
+
+  .remove-form {
+    margin-left: 1rem;
+  }
+</style>
 {% endblock %} {% block extra_js %}
-<script src="/static/js/cart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Quantity controls
+    const increaseButtons = document.querySelectorAll(".increase-quantity");
+    const decreaseButtons = document.querySelectorAll(".decrease-quantity");
+    const quantityInputs = document.querySelectorAll(".quantity-value");
+
+    // Handle quantity changes
+    function updateQuantity(variantId, newQuantity) {
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = '{% url "update_cart_item" %}';
+
+      const csrfToken = document.querySelector(
+        "[name=csrfmiddlewaretoken]",
+      ).value;
+      form.innerHTML = `
+        <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+        <input type="hidden" name="variant_id" value="${variantId}">
+        <input type="hidden" name="quantity" value="${newQuantity}">
+      `;
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    increaseButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const variantId = this.dataset.variantId;
+        const quantityInput = document.querySelector(
+          `input[data-variant-id="${variantId}"]`,
+        );
+        const newQuantity = parseInt(quantityInput.value) + 1;
+        quantityInput.value = newQuantity;
+        updateQuantity(variantId, newQuantity);
+      });
+    });
+
+    decreaseButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const variantId = this.dataset.variantId;
+        const quantityInput = document.querySelector(
+          `input[data-variant-id="${variantId}"]`,
+        );
+        const currentQuantity = parseInt(quantityInput.value);
+        if (currentQuantity > 1) {
+          const newQuantity = currentQuantity - 1;
+          quantityInput.value = newQuantity;
+          updateQuantity(variantId, newQuantity);
+        }
+      });
+    });
+
+    // Handle direct quantity input changes
+    quantityInputs.forEach((input) => {
+      input.addEventListener("change", function () {
+        const variantId = this.dataset.variantId;
+        const newQuantity = parseInt(this.value);
+        if (newQuantity >= 1) {
+          updateQuantity(variantId, newQuantity);
+        } else {
+          this.value = 1;
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

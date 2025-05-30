@@ -132,103 +132,103 @@ function getMockProduct(productId) {
   const mockProducts = [
     {
       id: "1",
-      name: "Wireless Bluetooth Headphones",
+      name: "Brake Pads Set",
       description:
-        "Premium noise-cancelling headphones with exceptional sound quality and comfort for extended use.",
-      price: 199.99,
+        "Premium quality brake pads for enhanced stopping power and durability.",
+      price: 2999,
       image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000",
-      category: "electronics",
+        "https://images.unsplash.com/photo-1558618047-3c8c8bc4fded?q=80&w=1000",
+      category: "brake-system",
       inStock: true,
       featured: true,
       rating: 4.5,
     },
     {
       id: "2",
-      name: "Smart Fitness Watch",
+      name: "Engine Oil Filter",
       description:
-        "Track your fitness goals with this sleek, feature-packed smartwatch with heart rate monitoring.",
-      price: 149.99,
+        "High-efficiency oil filter to keep your engine running smoothly.",
+      price: 599,
       image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=989",
-      category: "electronics",
+        "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=1000",
+      category: "engine-parts",
       inStock: true,
       featured: true,
       rating: 4.2,
     },
     {
       id: "3",
-      name: "Organic Cotton T-Shirt",
+      name: "Air Filter",
       description:
-        "Comfortable, eco-friendly t-shirt made from 100% organic cotton, perfect for everyday wear.",
-      price: 29.99,
+        "Premium air filter for optimal engine performance and fuel efficiency.",
+      price: 899,
       image:
-        "https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=987",
-      category: "clothing",
+        "https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=80&w=1000",
+      category: "engine-parts",
       inStock: true,
       featured: false,
       rating: 4.0,
     },
     {
       id: "4",
-      name: "Stainless Steel Water Bottle",
+      name: "Spark Plugs Set",
       description:
-        "Durable, leak-proof water bottle that keeps drinks cold for 24 hours or hot for 12 hours.",
-      price: 24.99,
+        "High-performance spark plugs for reliable ignition and engine efficiency.",
+      price: 1299,
       image:
-        "https://images.unsplash.com/photo-1589365278144-c9e705f843ba?q=80&w=987",
-      category: "home",
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1000",
+      category: "engine-parts",
       inStock: true,
       featured: false,
       rating: 4.8,
     },
     {
       id: "5",
-      name: "Leather Wallet",
+      name: "Battery",
       description:
-        "Classic leather wallet with multiple card slots and RFID protection technology.",
-      price: 49.99,
+        "Reliable automotive battery with long life and maintenance-free operation.",
+      price: 4999,
       image:
-        "https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=987",
-      category: "accessories",
+        "https://images.unsplash.com/photo-1609592806562-7b0b85be14b1?q=80&w=1000",
+      category: "electrical",
       inStock: true,
       featured: true,
       rating: 4.3,
     },
     {
       id: "6",
-      name: "Wireless Charging Pad",
+      name: "Shock Absorbers",
       description:
-        "Fast wireless charging for all Qi-enabled devices, with sleek minimalist design.",
-      price: 39.99,
+        "Premium shock absorbers for smooth ride quality and vehicle stability.",
+      price: 8999,
       image:
-        "https://images.unsplash.com/photo-1586495777744-4413f21062fa?q=80&w=1005",
-      category: "electronics",
+        "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?q=80&w=1000",
+      category: "suspension",
       inStock: true,
       featured: false,
       rating: 4.1,
     },
     {
       id: "7",
-      name: "Ceramic Coffee Mug Set",
+      name: "Transmission Fluid",
       description:
-        "Set of 4 hand-crafted ceramic mugs, perfect for your morning coffee or afternoon tea.",
-      price: 34.99,
+        "High-quality transmission fluid for smooth gear shifts and transmission longevity.",
+      price: 799,
       image:
-        "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?q=80&w=1010",
-      category: "home",
+        "https://images.unsplash.com/photo-1606636635834-0269b8bbb8ad?q=80&w=1000",
+      category: "engine-parts",
       inStock: true,
       featured: false,
       rating: 4.7,
     },
     {
       id: "8",
-      name: "Backpack",
+      name: "Tire Pressure Monitor",
       description:
-        "Durable backpack with laptop compartment and multiple pockets for organization.",
-      price: 79.99,
+        "Digital tire pressure monitoring system for enhanced safety and fuel efficiency.",
+      price: 2499,
       image:
-        "https://images.unsplash.com/photo-1491637639811-60e2756cc1c7?q=80&w=969",
+        "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1000",
       category: "accessories",
       inStock: true,
       featured: true,
@@ -237,4 +237,9 @@ function getMockProduct(productId) {
   ];
 
   return mockProducts.find((product) => product.id === productId);
+}
+
+// Format price in Indian rupees
+function formatPrice(price) {
+  return `₹${price.toLocaleString("en-IN")}`;
 }
