@@ -54,7 +54,7 @@ def products(request, category_slug=None, subcategory_slug=None, brand_slug=None
     brands = Brand.objects.all()
     products = Product.objects.filter(available=True)
     
-    # Handle category filtering
+    # Handle category filtering from URL parameters
     if category_slug and subcategory_slug:
         # Subcategory view
         category = get_object_or_404(Category, slug=category_slug, parent=None, is_active=True)
@@ -65,12 +65,12 @@ def products(request, category_slug=None, subcategory_slug=None, brand_slug=None
         category = get_object_or_404(Category, slug=category_slug, is_active=True)
         products = category.get_all_products()
     
-    # Handle brand filtering
+    # Handle brand filtering from URL parameters
     if brand_slug:
         brand = get_object_or_404(Brand, slug=brand_slug)
         products = products.filter(brand=brand)
     
-    # Add search functionality
+    # Handle form-based filtering
     search_query = request.GET.get('q', '')
     if search_query:
         products = products.filter(
@@ -80,26 +80,49 @@ def products(request, category_slug=None, subcategory_slug=None, brand_slug=None
             Q(brand__name__icontains=search_query)
         )
     
-    # Add price filtering
+    # Price filtering
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
     if min_price:
-        products = products.filter(variants__price__gte=min_price).distinct()
+        try:
+            min_price = float(min_price)
+            products = products.filter(variants__price__gte=min_price).distinct()
+        except (ValueError, TypeError):
+            pass
     if max_price:
-        products = products.filter(variants__price__lte=max_price).distinct()
+        try:
+            max_price = float(max_price)
+            products = products.filter(variants__price__lte=max_price).distinct()
+        except (ValueError, TypeError):
+            pass
     
-    # Add brand filtering from form
+    # Brand filtering from form
     brand_filter = request.GET.get('brand')
-    if brand_filter:
-        products = products.filter(brand_id=brand_filter)
+    if brand_filter and not brand_slug:  # Don't override URL-based brand filtering
+        try:
+            brand_id = int(brand_filter)
+            products = products.filter(brand_id=brand_id)
+            brand = Brand.objects.get(id=brand_id)
+        except (ValueError, TypeError, Brand.DoesNotExist):
+            pass
     
-    # Add category filtering from form
+    # Category filtering from form
     category_filter = request.GET.get('category')
-    if category_filter:
-        filter_category = Category.objects.get(id=category_filter)
-        products = filter_category.get_all_products()
+    if category_filter and not category_slug:  # Don't override URL-based category filtering
+        try:
+            category_id = int(category_filter)
+            filter_category = Category.objects.get(id=category_id, is_active=True)
+            products = filter_category.get_all_products()
+            # Set the current category for display
+            if filter_category.parent:
+                category = filter_category.parent
+                subcategory = filter_category
+            else:
+                category = filter_category
+        except (ValueError, TypeError, Category.DoesNotExist):
+            pass
     
-    # Get all categories for the filter
+    # Get all categories for the filter (including subcategories)
     all_categories = Category.objects.filter(is_active=True)
     
     context = {
@@ -173,6 +196,7 @@ def get_product_variants(request, product_id):
                 'variant_name': variant.variant_name,
                 'quantity_description': variant.quantity_description,
                 'price': str(variant.price),
+                'formatted_price': variant.formatted_price,
                 'stock': variant.stock,
                 'in_stock': variant.in_stock,
                 'is_default': variant.is_default,
@@ -223,6 +247,22 @@ def search_results(request):
             Q(category__name__icontains=query),
             available=True
         )
+        
+        # Apply price filtering to search results
+        min_price = request.GET.get('min_price')
+        max_price = request.GET.get('max_price')
+        if min_price:
+            try:
+                min_price = float(min_price)
+                products = products.filter(variants__price__gte=min_price).distinct()
+            except (ValueError, TypeError):
+                pass
+        if max_price:
+            try:
+                max_price = float(max_price)
+                products = products.filter(variants__price__lte=max_price).distinct()
+            except (ValueError, TypeError):
+                pass
     
     context = {
         'query': query,

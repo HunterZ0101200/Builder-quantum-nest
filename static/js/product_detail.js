@@ -116,37 +116,42 @@ function showToast(message) {
   }, 3000);
 }
 
-// Mock function to simulate getting product data
+// Mock function to simulate getting product data with rupee prices
 function getMockProduct(productId) {
   const mockProducts = [
     {
       id: "1",
-      name: "Wireless Bluetooth Headphones",
+      name: "Brake Pads Set",
       description:
-        "Premium noise-cancelling headphones with exceptional sound quality and comfort for extended use.",
-      price: 199.99,
+        "Premium quality brake pads for enhanced stopping power and durability.",
+      price: 2999,
       image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000",
-      category: "electronics",
+        "https://images.unsplash.com/photo-1558618047-3c8c8bc4fded?q=80&w=1000",
+      category: "brake-system",
       inStock: true,
       featured: true,
       rating: 4.5,
     },
     {
       id: "2",
-      name: "Smart Fitness Watch",
+      name: "Engine Oil Filter",
       description:
-        "Track your fitness goals with this sleek, feature-packed smartwatch with heart rate monitoring.",
-      price: 149.99,
+        "High-efficiency oil filter to keep your engine running smoothly.",
+      price: 599,
       image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=989",
-      category: "electronics",
+        "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=1000",
+      category: "engine-parts",
       inStock: true,
       featured: true,
       rating: 4.2,
     },
-    // Other products would be listed here
+    // Other products would be listed here with rupee prices
   ];
 
   return mockProducts.find((product) => product.id === productId);
+}
+
+// Format price in Indian rupees
+function formatPrice(price) {
+  return `₹${price.toLocaleString("en-IN")}`;
 }

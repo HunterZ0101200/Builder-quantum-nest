@@ -1,15 +1,16 @@
 {% extends "base.html" %} {% block title %} {% if current_category %} {{
-current_category.name }} {% else %} All Products {% endif %} {% endblock %} {%
-block content %}
+current_category.name }} {% elif current_brand %} {{ current_brand.name }} {%
+else %} All Auto Parts {% endif %} {% endblock %} {% block content %}
 <div class="container">
   <div class="products-header">
     <h1 class="page-title">
-      {% if current_category %} {{ current_category.name }} {% else %} All
-      Products {% endif %}
+      {% if current_category %} {{ current_category.name }} {% elif
+      current_brand %} {{ current_brand.name }} Parts {% else %} All Auto Parts
+      {% endif %}
     </h1>
     <p class="products-count">
-      {{ products|length }} {% if products|length == 1 %}product{% else
-      %}products{% endif %} available
+      {{ products|length }} {% if products|length == 1 %}part{% else %}parts{%
+      endif %} available
     </p>
   </div>
 
@@ -22,79 +23,147 @@ block content %}
 
     <!-- Filters Sidebar -->
     <div class="filters-sidebar" id="filtersSidebar">
-      <div class="filters-content">
-        <div class="filters-header">
-          <h3 class="filters-title">Filters</h3>
-          <button class="btn btn-text btn-sm" id="clearFilters">
-            Clear all
-          </button>
-        </div>
-
-        <div class="filter-group">
-          <h4 class="filter-group-title">Search</h4>
-          <div class="search-filter">
-            <i class="fas fa-search search-icon"></i>
-            <input
-              type="search"
-              placeholder="Search products..."
-              class="search-input"
-              id="productSearch"
-            />
-            <button
-              class="btn btn-icon clear-search-btn"
-              id="clearSearch"
-              style="display: none"
-            >
-              <i class="fas fa-times"></i>
+      <form method="get" class="filters-form">
+        <div class="filters-content">
+          <div class="filters-header">
+            <h3 class="filters-title">Filters</h3>
+            <button type="button" class="btn btn-text btn-sm" id="clearFilters">
+              Clear all
             </button>
           </div>
-        </div>
 
-        <div class="filter-group">
-          <h4 class="filter-group-title">Price Range</h4>
-          <div class="price-range">
-            <div class="price-range-labels">
-              <span class="price-min">$<span id="priceMin">0</span></span>
-              <span class="price-max">$<span id="priceMax">500</span></span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="500"
-              value="500"
-              class="price-slider"
-              id="priceSlider"
-            />
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <h4 class="filter-group-title">Categories</h4>
-          <div class="categories-filter">
-            {% for category in categories %}
-            <div class="category-checkbox">
+          <div class="filter-group">
+            <h4 class="filter-group-title">Search</h4>
+            <div class="search-filter">
+              <i class="fas fa-search search-icon"></i>
               <input
-                type="checkbox"
-                id="category-{{ category.id }}"
-                value="{{ category.id }}"
-                {%
-                if
-                current_category
-                and
-                current_category.id=""
-                ="category.id"
-                %}checked{%
-                endif
-                %}
+                type="search"
+                name="q"
+                placeholder="Search parts..."
+                class="search-input"
+                id="productSearch"
+                value="{{ search_query }}"
               />
-              <label for="category-{{ category.id }}"
-                >{{ category.name }}</label
+              <button
+                type="button"
+                class="btn btn-icon clear-search-btn"
+                id="clearSearch"
+                style="display: {% if search_query %}block{% else %}none{% endif %}"
               >
+                <i class="fas fa-times"></i>
+              </button>
             </div>
-            {% endfor %}
           </div>
+
+          <div class="filter-group">
+            <h4 class="filter-group-title">Price Range</h4>
+            <div class="price-range">
+              <div class="price-inputs">
+                <input
+                  type="number"
+                  name="min_price"
+                  placeholder="Min ₹"
+                  class="price-input"
+                  value="{{ request.GET.min_price }}"
+                />
+                <input
+                  type="number"
+                  name="max_price"
+                  placeholder="Max ₹"
+                  class="price-input"
+                  value="{{ request.GET.max_price }}"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <h4 class="filter-group-title">Brand</h4>
+            <div class="brand-filter">
+              <select name="brand" class="form-input">
+                <option value="">All Brands</option>
+                {% for brand in brands %}
+                <option
+                  value="{{ brand.id }}"
+                  {% if request.GET.brand == brand.id|stringformat:'s' %}selected{% endif %}
+                >
+                  {{ brand.name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <h4 class="filter-group-title">Categories</h4>
+            <div class="categories-filter">
+              <!-- Main Categories -->
+              {% for main_category in main_categories %}
+              <div class="category-group">
+                <div class="category-main">
+                  <input
+                    type="radio"
+                    id="main-category-{{ main_category.id }}"
+                    name="category"
+                    value="{{ main_category.id }}"
+                    {% if current_category.id == main_category.id %}checked{% endif %}
+                  />
+                  <label
+                    for="main-category-{{ main_category.id }}"
+                    class="category-label"
+                  >
+                    {{ main_category.name }}
+                  </label>
+                </div>
+
+                <!-- Subcategories -->
+                {% if main_category.children.all %}
+                <div class="subcategories">
+                  {% for subcategory in main_category.children.all %}
+                  <div class="subcategory-item">
+                    <input
+                      type="radio"
+                      id="sub-category-{{ subcategory.id }}"
+                      name="category"
+                      value="{{ subcategory.id }}"
+                      {% if current_category.id == subcategory.id %}checked{% endif %}
+                    />
+                    <label
+                      for="sub-category-{{ subcategory.id }}"
+                      class="subcategory-label"
+                    >
+                      {{ subcategory.name }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+              {% endfor %}
+
+              <!-- All Products Option -->
+              <div class="category-group">
+                <div class="category-main">
+                  <input
+                    type="radio"
+                    id="all-categories"
+                    name="category"
+                    value=""
+                    {% if not current_category %}checked{% endif %}
+                  />
+                  <label for="all-categories" class="category-label">
+                    All Products
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full filter-apply">
+            Apply Filters
+          </button>
         </div>
-      </div>
+      </form>
     </div>
 
     <!-- Product Grid -->
@@ -102,9 +171,9 @@ block content %}
       <div class="products-grid">
         {% for product in products %}
         <div class="product-card">
-          <a href="/product/{{ product.id }}/">
+          <a href="{{ product.get_absolute_url }}">
             <div class="product-image">
-              <img src="{{ product.image }}" alt="{{ product.name }}" />
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" />
               {% if product.featured %}
               <span class="product-badge">Featured</span>
               {% endif %} {% if not product.in_stock %}
@@ -114,35 +183,188 @@ block content %}
               {% endif %}
             </div>
             <div class="product-content">
+              <div class="product-brand">{{ product.brand.name }}</div>
               <div class="product-rating">
                 <i class="fas fa-star"></i>
                 <span>{{ product.rating }}</span>
               </div>
               <h3 class="product-title">{{ product.name }}</h3>
-              <p class="product-price">${{ product.price }}</p>
-            </div>
-            <div class="product-footer">
-              <button
-                class="btn btn-primary btn-full add-to-cart"
-                data-product-id="{{ product.id }}"
-                {%
-                if
-                not
-                product.in_stock
-                %}disabled{%
-                endif
-                %}
-              >
-                <i class="fas fa-shopping-cart"></i> Add to Cart
-              </button>
+              {% if product.part_number %}
+              <div class="part-number">Part #: {{ product.part_number }}</div>
+              {% endif %}
+              <p class="product-price">{{ product.price_range }}</p>
             </div>
           </a>
+        </div>
+        {% empty %}
+        <div class="no-products">
+          <h3>No parts found</h3>
+          <p>Try adjusting your filters or search terms.</p>
         </div>
         {% endfor %}
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  /* Additional styles for auto parts filtering */
+  .price-inputs {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .price-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+  }
+
+  .brand-filter select {
+    width: 100%;
+  }
+
+  .filter-apply {
+    margin-top: 1rem;
+  }
+
+  .no-products {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-light);
+  }
+
+  .product-brand {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    margin-bottom: 0.25rem;
+  }
+
+  .part-number {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    margin-top: 0.25rem;
+    font-family: monospace;
+  }
+
+  /* Category filtering styles */
+  .category-group {
+    margin-bottom: 1rem;
+  }
+
+  .category-main {
+    margin-bottom: 0.5rem;
+  }
+
+  .category-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+    cursor: pointer;
+  }
+
+  .subcategories {
+    margin-left: 1rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-border);
+  }
+
+  .subcategory-item {
+    margin-bottom: 0.25rem;
+  }
+
+  .subcategory-label {
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    color: var(--color-text-light);
+  }
+
+  .category-label:hover,
+  .subcategory-label:hover {
+    color: var(--color-primary);
+  }
+</style>
 {% endblock %} {% block extra_js %}
-<script src="/static/js/products.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Toggle filters on mobile
+    const filtersToggle = document.getElementById("filtersToggle");
+    const filtersSidebar = document.getElementById("filtersSidebar");
+
+    if (filtersToggle && filtersSidebar) {
+      filtersToggle.addEventListener("click", function () {
+        filtersSidebar.classList.toggle("active");
+
+        // Update button text
+        if (filtersSidebar.classList.contains("active")) {
+          filtersToggle.innerHTML =
+            '<i class="fas fa-sliders-h"></i> Hide Filters';
+        } else {
+          filtersToggle.innerHTML =
+            '<i class="fas fa-sliders-h"></i> Show Filters';
+        }
+      });
+    }
+
+    // Product search
+    const productSearch = document.getElementById("productSearch");
+    const clearSearch = document.getElementById("clearSearch");
+
+    if (productSearch) {
+      productSearch.addEventListener("input", function () {
+        // Show/hide clear button
+        if (clearSearch) {
+          if (this.value) {
+            clearSearch.style.display = "block";
+          } else {
+            clearSearch.style.display = "none";
+          }
+        }
+      });
+    }
+
+    if (clearSearch && productSearch) {
+      clearSearch.addEventListener("click", function () {
+        productSearch.value = "";
+        this.style.display = "none";
+      });
+    }
+
+    // Clear all filters
+    const clearFilters = document.getElementById("clearFilters");
+
+    if (clearFilters) {
+      clearFilters.addEventListener("click", function () {
+        // Reset search
+        if (productSearch && clearSearch) {
+          productSearch.value = "";
+          clearSearch.style.display = "none";
+        }
+
+        // Reset price inputs
+        const priceInputs = document.querySelectorAll(".price-input");
+        priceInputs.forEach((input) => {
+          input.value = "";
+        });
+
+        // Reset brand select
+        const brandSelect = document.querySelector('select[name="brand"]');
+        if (brandSelect) {
+          brandSelect.value = "";
+        }
+
+        // Reset category radio buttons to "All Products"
+        const allCategoriesRadio = document.getElementById("all-categories");
+        if (allCategoriesRadio) {
+          allCategoriesRadio.checked = true;
+        }
+
+        console.log("All filters cleared");
+      });
+    }
+  });
+</script>
 {% endblock %}

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ShopFusion - {% block title %}Home{% endblock %}</title>
+    <title>AutoParts Pro - {% block title %}Home{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/styles.css" />
     <!-- Font Awesome for icons -->
     <link
@@ -15,27 +15,51 @@
   <body>
     <header class="header">
       <div class="container header-container">
-        <a href="/" class="logo">ShopFusion</a>
+        <a href="{% url 'home' %}" class="logo">AutoParts Pro</a>
 
         <!-- Desktop Navigation -->
         <nav class="desktop-nav">
-          <a href="/" class="nav-link">Home</a>
-          <a href="/products/" class="nav-link">All Products</a>
-          <a href="/products/electronics/" class="nav-link">Electronics</a>
-          <a href="/products/clothing/" class="nav-link">Clothing</a>
-          <a href="/products/accessories/" class="nav-link">Accessories</a>
+          <a href="{% url 'home' %}" class="nav-link">Home</a>
+          <div class="nav-dropdown">
+            <a
+              href="{% url 'category_list' %}"
+              class="nav-link dropdown-toggle"
+            >
+              Categories <i class="fas fa-chevron-down"></i>
+            </a>
+            <div class="dropdown-menu">
+              {% for main_category in categories %}
+              <a
+                href="{{ main_category.get_absolute_url }}"
+                class="dropdown-item"
+              >
+                <i class="fas fa-folder"></i> {{ main_category.name }}
+              </a>
+              {% for subcategory in main_category.children.all %}
+              <a
+                href="{{ subcategory.get_absolute_url }}"
+                class="dropdown-item dropdown-submenu-item"
+              >
+                <i class="fas fa-cog"></i> {{ subcategory.name }}
+              </a>
+              {% endfor %} {% endfor %}
+            </div>
+          </div>
+          <a href="{% url 'products' %}" class="nav-link">All Products</a>
         </nav>
 
         <div class="header-actions">
           <!-- Search Button -->
-          <a href="/search/" class="icon-button">
+          <a href="{% url 'search' %}" class="icon-button">
             <i class="fas fa-search"></i>
           </a>
 
           <!-- Cart Icon -->
-          <a href="/cart/" class="icon-button cart-icon">
+          <a href="{% url 'cart' %}" class="icon-button cart-icon">
             <i class="fas fa-shopping-bag"></i>
-            <span class="cart-count" id="cartCount">0</span>
+            <span class="cart-count" id="cartCount"
+              >{{ cart_count|default:0 }}</span
+            >
           </a>
 
           <!-- Profile Icon -->
@@ -53,11 +77,20 @@
       <!-- Mobile Navigation -->
       <div class="mobile-nav" id="mobileNav">
         <nav class="mobile-nav-menu">
-          <a href="/" class="nav-link">Home</a>
-          <a href="/products/" class="nav-link">All Products</a>
-          <a href="/products/electronics/" class="nav-link">Electronics</a>
-          <a href="/products/clothing/" class="nav-link">Clothing</a>
-          <a href="/products/accessories/" class="nav-link">Accessories</a>
+          <a href="{% url 'home' %}" class="nav-link">Home</a>
+          <a href="{% url 'category_list' %}" class="nav-link"
+            >All Categories</a
+          >
+          <a href="{% url 'products' %}" class="nav-link">All Products</a>
+          {% for main_category in categories %}
+          <a
+            href="{{ main_category.get_absolute_url }}"
+            class="nav-link mobile-category"
+          >
+            {{ main_category.name }}
+          </a>
+          {% endfor %}
+          <!-- Profile link in mobile menu -->
           <a href="#" class="nav-link">
             <i class="fas fa-user"></i> My Profile
           </a>
@@ -71,13 +104,16 @@
       <div class="container">
         <div class="footer-grid">
           <div class="footer-column">
-            <h3 class="footer-heading">Shop</h3>
+            <h3 class="footer-heading">Shop by Category</h3>
             <ul class="footer-links">
-              <li><a href="/products/">All Products</a></li>
-              <li><a href="/products/electronics/">Electronics</a></li>
-              <li><a href="/products/clothing/">Clothing</a></li>
-              <li><a href="/products/accessories/">Accessories</a></li>
-              <li><a href="/products/home/">Home & Kitchen</a></li>
+              <li><a href="{% url 'category_list' %}">All Categories</a></li>
+              {% for main_category in categories %}
+              <li>
+                <a href="{{ main_category.get_absolute_url }}"
+                  >{{ main_category.name }}</a
+                >
+              </li>
+              {% endfor %}
             </ul>
           </div>
 
@@ -87,7 +123,8 @@
               <li><a href="#">Contact Us</a></li>
               <li><a href="#">Shipping Policy</a></li>
               <li><a href="#">Returns & Exchanges</a></li>
-              <li><a href="#">FAQs</a></li>
+              <li><a href="#">Bulk Orders</a></li>
+              <li><a href="#">Professional Discounts</a></li>
             </ul>
           </div>
 
@@ -104,8 +141,8 @@
           <div class="footer-column">
             <h3 class="footer-heading">Stay Connected</h3>
             <p class="footer-text">
-              Subscribe to our newsletter for updates on new products and
-              special promotions.
+              Subscribe to our newsletter for new product updates and exclusive
+              offers for auto professionals.
             </p>
             <div class="social-icons">
               <a href="#" class="social-icon"
@@ -124,7 +161,7 @@
 
         <div class="footer-bottom">
           <p>
-            &copy; <span id="currentYear"></span> ShopFusion. All rights
+            &copy; <span id="currentYear"></span> AutoParts Pro. All rights
             reserved.
           </p>
         </div>
@@ -137,5 +174,79 @@
       document.getElementById("currentYear").textContent =
         new Date().getFullYear();
     </script>
+
+    <style>
+      /* Dropdown navigation styles */
+      .nav-dropdown {
+        position: relative;
+      }
+
+      .dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 250px;
+        max-height: 400px;
+        overflow-y: auto;
+        background-color: var(--color-background);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .nav-dropdown:hover .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        color: var(--color-text);
+        text-decoration: none;
+        transition: background-color 0.2s;
+      }
+
+      .dropdown-item:hover {
+        background-color: var(--color-secondary);
+      }
+
+      .dropdown-item i {
+        width: 1rem;
+        color: var(--color-text-light);
+      }
+
+      .dropdown-submenu-item {
+        padding-left: 2rem;
+        background-color: rgba(0, 0, 0, 0.02);
+      }
+
+      .mobile-category {
+        padding-left: 1rem;
+        font-size: 0.875rem;
+      }
+
+      /* Hide dropdown on mobile */
+      @media (max-width: 767px) {
+        .nav-dropdown {
+          display: none;
+        }
+      }
+    </style>
   </body>
 </html>

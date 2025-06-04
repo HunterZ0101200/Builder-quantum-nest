@@ -2,13 +2,13 @@
 content %}
 <div class="container">
   <div class="search-results-header">
-    <a href="/search/" class="back-link">
+    <a href="{% url 'search' %}" class="back-link">
       <i class="fas fa-arrow-left"></i> Back to Search
     </a>
 
     <!-- Search Form -->
     <form
-      action="/search-results/"
+      action="{% url 'search_results' %}"
       method="get"
       class="search-form results-search-form"
     >
@@ -46,33 +46,48 @@ content %}
     </button>
 
     <!-- Filters Sidebar -->
-    <div class="filters-sidebar" id="filtersSidebar">
-      <div class="filters-content">
-        <div class="filters-header">
-          <h3 class="filters-title">Filters</h3>
-          <button class="btn btn-text btn-sm" id="clearFilters">
-            Clear all
+    <div
+      class="filters-sidebar"
+      id="filtersSidebar"
+      style="display: {% if filters_visible %}block{% else %}none{% endif %}"
+    >
+      <form method="get" class="filters-form">
+        <input type="hidden" name="q" value="{{ query }}" />
+        <div class="filters-content">
+          <div class="filters-header">
+            <h3 class="filters-title">Filters</h3>
+            <button type="button" class="btn btn-text btn-sm" id="clearFilters">
+              Clear all
+            </button>
+          </div>
+
+          <div class="filter-group">
+            <h4 class="filter-group-title">Price Range</h4>
+            <div class="price-range">
+              <div class="price-inputs">
+                <input
+                  type="number"
+                  name="min_price"
+                  placeholder="Min ₹"
+                  class="price-input"
+                  value="{{ request.GET.min_price }}"
+                />
+                <input
+                  type="number"
+                  name="max_price"
+                  placeholder="Max ₹"
+                  class="price-input"
+                  value="{{ request.GET.max_price }}"
+                />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full filter-apply">
+            Apply Filters
           </button>
         </div>
-
-        <div class="filter-group">
-          <h4 class="filter-group-title">Price Range</h4>
-          <div class="price-range">
-            <div class="price-range-labels">
-              <span class="price-min">$<span id="priceMin">0</span></span>
-              <span class="price-max">$<span id="priceMax">500</span></span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="500"
-              value="500"
-              class="price-slider"
-              id="priceSlider"
-            />
-          </div>
-        </div>
-      </div>
+      </form>
     </div>
 
     <!-- Product Grid -->
@@ -80,9 +95,9 @@ content %}
       <div class="products-grid">
         {% for product in products %}
         <div class="product-card">
-          <a href="/product/{{ product.id }}/">
+          <a href="{{ product.get_absolute_url }}">
             <div class="product-image">
-              <img src="{{ product.image }}" alt="{{ product.name }}" />
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" />
               {% if product.featured %}
               <span class="product-badge">Featured</span>
               {% endif %} {% if not product.in_stock %}
@@ -92,12 +107,16 @@ content %}
               {% endif %}
             </div>
             <div class="product-content">
+              <div class="product-brand">{{ product.brand.name }}</div>
               <div class="product-rating">
                 <i class="fas fa-star"></i>
                 <span>{{ product.rating }}</span>
               </div>
               <h3 class="product-title">{{ product.name }}</h3>
-              <p class="product-price">${{ product.price }}</p>
+              {% if product.part_number %}
+              <div class="part-number">Part #: {{ product.part_number }}</div>
+              {% endif %}
+              <p class="product-price">{{ product.price_range }}</p>
             </div>
             <div class="product-footer">
               <button
@@ -129,10 +148,81 @@ content %}
     <p class="empty-results-text">
       Try using different keywords or browse our categories
     </p>
-    <a href="/products/" class="btn btn-primary">Browse All Products</a>
+    <a href="{% url 'products' %}" class="btn btn-primary"
+      >Browse All Products</a
+    >
   </div>
   {% endif %}
 </div>
+
+<style>
+  /* Additional styles for search results */
+  .price-inputs {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .price-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+  }
+
+  .filter-apply {
+    margin-top: 1rem;
+  }
+
+  .product-brand {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    margin-bottom: 0.25rem;
+  }
+
+  .part-number {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    margin-top: 0.25rem;
+    font-family: monospace;
+  }
+</style>
 {% endblock %} {% block extra_js %}
-<script src="/static/js/search_results.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Toggle filters on mobile
+    const filtersToggle = document.getElementById("filtersToggle");
+    const filtersSidebar = document.getElementById("filtersSidebar");
+
+    if (filtersToggle && filtersSidebar) {
+      filtersToggle.addEventListener("click", function () {
+        const isVisible = filtersSidebar.style.display !== "none";
+
+        if (isVisible) {
+          filtersSidebar.style.display = "none";
+          filtersToggle.innerHTML =
+            '<i class="fas fa-sliders-h"></i> Show Filters';
+        } else {
+          filtersSidebar.style.display = "block";
+          filtersToggle.innerHTML =
+            '<i class="fas fa-sliders-h"></i> Hide Filters';
+        }
+      });
+    }
+
+    // Clear filters
+    const clearFilters = document.getElementById("clearFilters");
+
+    if (clearFilters) {
+      clearFilters.addEventListener("click", function () {
+        // Reset price inputs
+        const priceInputs = document.querySelectorAll(".price-input");
+        priceInputs.forEach((input) => {
+          input.value = "";
+        });
+
+        console.log("Filters cleared");
+      });
+    }
+  });
+</script>
 {% endblock %}
